@@ -16,6 +16,7 @@ namespace ConsoleBankApp
             byte accountNumber = 0, selection, selection2, selection3 = 0, selection4;
             int adminPassword = 123123, enteredAdminPassword;
             bool verification = false; //used for user login
+            decimal depositAmount, withdrawalAmount;
             char answer = 'a'; //Declared for transaction menu, for Continue=(Y)ES or (N)O
 
             DatabaseOperations dbo = new DatabaseOperations();
@@ -159,111 +160,134 @@ namespace ConsoleBankApp
 
             while (verification == true && selection3 != 1)
             {
-
+                for(int j=0; j<accountList.Count;j++)
+                {
+                    Console.WriteLine(accountList[j].name+ accountList[j].surname + accountList[j].accountNumber + accountList[j].accountNumber);
+                }
 
 
                 do
                 {
-                    //Console.WriteLine("Sayin %s %s, Sezgin Bank\'a Hos Geldiniz...\n\n", ad, soyad);
-                    //printf("\n%s %s %d", ad, soyad, bakiye);
+                    Console.Clear();
                     Console.WriteLine(" Welcome, {0} {1}\n Account number:{2}", accountList[accountNumber].name, accountList[accountNumber].surname, accountList[accountNumber].accountNumber);
                     Console.WriteLine(" ============\n TRANSACTION MENU\n ============\n\n");
-                    Console.WriteLine(" 1-Hesap Bakiyesi Goruntuleme\n 2-Hesaba Para Yatirma\n 3-Hesaptan Para Cekme\n 4-Para Gonderme\n 5-Cikis\n");
-                    Console.WriteLine(" Luften Rakam Girerek Yapacaginiz Islemi Seciniz (1/2/3/4/5): ");
-                    selection4 = Convert.ToByte(Console.ReadKey().Key);
-                    Console.WriteLine("\n");
+                    Console.WriteLine(" 1-View account balance\n 2-Deposit\n 3-Withdrawal\n 4-Remittance/Transfer\n 5-Exit\n");
+                    Console.WriteLine(" Please select transaction by entering number (1/2/3/4/5): ");
+                    selection4 = Convert.ToByte(Console.ReadLine());
                     switch (selection4)
                     {
-                        case 1: //Hesap bakiyesi görüntüleme.
-                                //system("CLS");
-                            Console.WriteLine("\n Hesap Bakiyesi Goruntuleme");
-                            Console.WriteLine("\n --------------------------");
-                            //Console.WriteLine("\n\n Hesabinizda Bulunan Para: %d TL \n", hesap[hesapNo].bakiye);
+                        case 1: //Displaying account's balance
+                            Console.Clear();
+                            Console.WriteLine(" View account balance");
+                            Console.WriteLine(" ====================");
+                            Console.WriteLine("\n\n Your current balance: {0}$ \n", accountList[accountNumber].balance);
                             Console.WriteLine("\n\n");
                             break;
 
-                        case 2: //Hesaba para yatırma.
-                                //system("CLS");
-                            Console.WriteLine("\n Hesaba Para Yatirma");
-                            Console.WriteLine("\n ===================");
-                            Console.WriteLine("\n\n Hesabiniza Yatacak Para Tutarini Giriniz:");
-                            //Console.WriteLine("%d", &yatanPara);
-                            //hesap[hesapNo].bakiye += yatanPara;
-                            //*bakiye += yatanPara;
-                            //VeritabaniGuncelle(hesap);
-                            //Console.WriteLine(" Hesabiniza Yatan Para: %d TL \n\n", yatanPara);
-                            //Console.WriteLine(" Hesabinizda Bulunan Para: %d TL \n", hesap[hesapNo].bakiye);
-                            Console.WriteLine("\n\n");
+                        case 2: //Deposit to account
+                            Console.Clear();
+                            Console.WriteLine("\n Deposit to your account");
+                            Console.WriteLine("\n =======================");
+                            Console.WriteLine("\n\n Please enter the amount you want to deposit into your account:");
+                            depositAmount = Convert.ToDecimal(Console.ReadLine());
+                            if (depositAmount <= 0)
+                            {
+                                Console.WriteLine(" You've entered an invalid value");
+                                break;
+                            }
+                            Console.WriteLine("\n Deposit amount: {0}$", depositAmount);
+                            System.Threading.Thread.Sleep(1000);
+                            accountList[accountNumber].balance += depositAmount;
+                            dbo.WriteToFile(accountList);
+                            Console.WriteLine("\n Your current balance: {0}$\n", accountList[accountNumber].balance);
                             break;
 
-                        case 3: //Hesaptan para çekme.
-                            /*while (true)
+                        case 3: //Withdrawal
+                            while (true)
 							{
-								//system("CLS");
+								Console.Clear();
 								Console.WriteLine("\n Hesaptan Para Cekme");
 								Console.WriteLine("\n ===================");
 								Console.WriteLine("\n\n Hesabinizdan Cekilecek Para Tutarini Giriniz:");
-								//scanf("%d", &cekilenPara);
-								if (cekilenPara <= hesap[hesapNo].bakiye)
+                                withdrawalAmount = Convert.ToDecimal(Console.ReadLine());
+                                //scanf("%d", &cekilenPara);
+								if (withdrawalAmount <= accountList[accountNumber].balance)
 								{
-									//hesap[hesapNo].bakiye -= cekilenPara;
-									//VeritabaniGuncelle(hesap);
-									Console.WriteLine(" Hesabinizdan Cekilen Para: %d TL \n\n", cekilenPara);
-									Console.WriteLine(" Hesabinizda Kalan Para: %d TL \n", hesap[hesapNo].bakiye);
+                                    accountList[accountNumber].balance -= withdrawalAmount;
+                                    dbo.WriteToFile(accountList);
+									Console.WriteLine(" Withdrawal amount: {0}$TL \n\n", withdrawalAmount);
+									Console.WriteLine(" Your current balance: {0}$\n", accountList[accountNumber].balance);
 									break;
 								}
-
+                                else if (withdrawalAmount <= 0)
+                                {
+                                    Console.WriteLine(" You've entered an invalid value...");
+                                    break;
+                                }
 								else
 								{
-									Console.WriteLine("\n Bakiyeniz Yetersiz...\n\n");
-									Console.WriteLine(" Hesabinizdan Cekilecek Para Tutarini Tekrar Giriniz.\n\n");
-									//Sleep(2000);
-									continue;
+									Console.WriteLine("\n Insufficient balance...\n\n");
+                                    System.Threading.Thread.Sleep(1000);
+                                    continue;
 								}
-							}*/
+							}
                             Console.WriteLine("\n\n");
                             break;
 
-                        case 4: //Para gönderme.
+                        case 4: //Money Transfer-Remittance
                             while (true)
                             {
+                                int receiverAcountNumber;
+                                decimal remittanceAmount;
                                 Console.Clear();
-                                Console.WriteLine("\n Para Gonderme");
-                                Console.WriteLine("\n =============");
-                                Console.WriteLine("\n\n Hesabinizdan Gonderilecek Para Tutarini Giriniz:");
-                                //scanf("%d", &gonderilenPara);
-                                /*if (hesap[hesapNo].bakiye >= gonderilenPara)
+                                Console.WriteLine("\n Remittance");
+                                Console.WriteLine("\n ==========");
+                                Console.Write("\n\n Please enter receiver's account number: ");
+                                receiverAcountNumber = Convert.ToInt32(Console.ReadLine()) - 1;
+                                if(receiverAcountNumber<0 || receiverAcountNumber >= accountList.Count || receiverAcountNumber==accountNumber)
+                                {
+                                    Console.WriteLine(" You've entered an invalid account number...");
+                                    break;
+                                }
+                                Console.Write("\n\n Please enter the amount you want to transfer: ");
+                                remittanceAmount = Convert.ToInt32(Console.ReadLine());
+                                if (remittanceAmount < 0)
+                                {
+                                    Console.WriteLine(" You've entered an invalid value...");
+                                    break;
+                                }
+
+                                if (accountList[accountNumber].balance >= remittanceAmount)
 								{
-									hesap[hesapNo].bakiye -= gonderilenPara;
-									VeritabaniGuncelle(hesap);
-									Console.WriteLine(" Hesabinizdan Gonderilen Para Tutari: %d TL \n\n", gonderilenPara);
-									Console.WriteLine(" Hesabinizda Kalan Para: %d TL \n", hesap[hesapNo].bakiye);
+                                    accountList[accountNumber].balance -= remittanceAmount;
+                                    accountList[receiverAcountNumber].balance += remittanceAmount;
+                                    dbo.WriteToFile(accountList);
+									Console.WriteLine(" You have transferred {0}$ to {1} {2}'s account.\n\n", remittanceAmount, accountList[receiverAcountNumber].name, accountList[receiverAcountNumber].surname);
+									Console.WriteLine(" Your current balance: {0}$ \n", accountList[accountNumber].balance);
 									break;
 								}
 								else
 								{
 									Console.WriteLine("\n");
-									Console.WriteLine(" Bakiyeniz Yetersiz.\n\n");
-									Console.WriteLine(" Hesabinizdan Gonderilecek Para Tutarini Tekrar Giriniz.\n");
-									Sleep(2000);
+									Console.WriteLine(" Insufficient balance...\n\n");
+									System.Threading.Thread.Sleep(1500);
 									continue;
-								}*/
+								}
 
                             }
                             Console.WriteLine("\n\n");
                             break;
 
-                        case 5: //Banka sisteminden çıkış yapma.
+                        case 5: //Exit from bank app.
                             Console.Clear();
                             Console.WriteLine("\n");
-                            Console.WriteLine("Cikis yapiliyor...\n\n");
-                            //cevap2 = 'H';  //Başka işlem yapmak istiyor musun? 'H': Hayır
-                            //goto cikis;  //Kullanıcı direkt olarak çıkışa yönlendirilir. (NOT: goto kullanımı tavsiye edilmez. Bunun yerine döngüler kullanılabilir.)
+                            Console.WriteLine(" Exiting...\n\n");
+                            answer = 'N';  //Do you want to continue=> 'N': NO
                             break;
 
-                        default: //Kullanıcının 1-2-3-4-5 dışında bir seçenek girmesi halide default yapısı çalışır.
+                        default:
                             Console.Clear();
-                            Console.WriteLine("\n Boyle Bir Islem Secenegi Yoktur.\n");
+                            Console.WriteLine("\n You've entered an invalid value...\n");
                             Console.WriteLine("\n");
                             break;
                     }

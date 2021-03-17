@@ -25,6 +25,10 @@ namespace ConsoleBankApp
         {
 
         }
+        public void MakeRemittance()
+        {
+
+        }
 
         //constructor
         public BankAccount(int accountNumber, string name, string surname, string password, decimal initialBalance=0)
