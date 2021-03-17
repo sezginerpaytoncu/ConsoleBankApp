@@ -24,7 +24,7 @@ namespace ConsoleBankApp
                 Account[i].Balance = Convert.ToDecimal(sr.ReadLine());
                 i++;
             }
-        }*/
+        }
         public static void SaveAccount(string _name, string _surname, string _password, float _balance = 0)
             {
                 StreamWriter sw = new StreamWriter("AccountDatabase.txt", append: true);
@@ -35,32 +35,36 @@ namespace ConsoleBankApp
         static void ShowAccounts()
         {
 
-        }
-
-
+        }*/
 
         public void WriteToFile(List<BankAccount> lst)
         {
-            //lst file'a yazılacak
+            StreamWriter sw = new StreamWriter("AccountDatabase.txt");
+            foreach (var item in lst)
+            {
+                sw.WriteLine(String.Format("{0,-10} {1,-15} {2,-15} {3,-15} {4,-15}", item.accountNumber, item.name, item.surname, item.password, item.balance));
+            }
+            sw.Close();
         }
 
         public List<BankAccount> ReadFromFile()
         {
-            //FileStream fs = new FileStream("AccountDatabase.txt", FileMode.Open, FileAccess.Read);
-            //StreamReader sr = new StreamReader(fs);
+            if (File.Exists("AccountDatabase.txt") == false)
+            {              
+                FileStream fs = new FileStream("AccountDatabase.txt", FileMode.Create);
+                fs.Close();
+            }
+
             List<string> lines = new List<string>();
             List<BankAccount> baList = new List<BankAccount>();
 
             lines = File.ReadAllLines("AccountDatabase.txt").ToList();
             foreach (string line in lines)
             {
-                //string[] items = line.Split(' ');
                 string[] items = line.Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-                BankAccount ba = new BankAccount(items[0], items[1], items[2], Convert.ToDecimal(items[3]));
+                BankAccount ba = new BankAccount(Convert.ToInt32(items[0]), items[1], items[2], items[3], Convert.ToDecimal(items[4]));
                 baList.Add(ba);
             }
-
-
             return baList;
         }
 
@@ -78,7 +82,7 @@ namespace ConsoleBankApp
                 components = line.Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
                 Console.WriteLine(components[0] + " " + components[1] + " " + components[2] + " " + components[3]);
                 Console.ReadKey();
-                if (components[0] == _name && components[1] == _surname && components[2] == _password)
+                if (components[1] == _name && components[2] == _surname && components[3] == _password)
                 {
                     Console.WriteLine("User's name, surname and password verified");
                     flag = true;

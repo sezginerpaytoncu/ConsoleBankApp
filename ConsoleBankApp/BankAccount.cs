@@ -27,8 +27,9 @@ namespace ConsoleBankApp
         }
 
         //constructor
-        public BankAccount(string name, string surname, string password, decimal initialBalance=0)
+        public BankAccount(int accountNumber, string name, string surname, string password, decimal initialBalance=0)
         {
+            this.accountNumber = accountNumber;
             this.name = name;
             this.surname = surname;
             this.password = password;

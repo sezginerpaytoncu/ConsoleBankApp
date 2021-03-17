@@ -16,19 +16,15 @@ namespace ConsoleBankApp
             byte accountNumber = 0, selection, selection2, selection3 = 0, selection4;
             int adminPassword = 123123, enteredAdminPassword;
             bool verification = false; //used for user login
+            char answer = 'a'; //Declared for transaction menu, for Continue=(Y)ES or (N)O
 
             DatabaseOperations dbo = new DatabaseOperations();
             List<BankAccount> accountList = dbo.ReadFromFile();
-            Console.WriteLine(" Name \t\tSurname   \tPassword  \tBalance");
-            Console.WriteLine(" ======================================================");
-            foreach (var item in accountList)
-            {
-                Console.WriteLine(String.Format(" {0,-15} {1,-15} {2,-15} {3,-15}", item.name, item.surname, item.password, item.balance));
-            }
+
             
 
-            Console.WriteLine(accountList[0].name);
-            Console.ReadLine();
+            //Console.WriteLine(accountList[0].name);
+            //Console.ReadLine();
 
             while (true) //Main Menu
             {
@@ -44,23 +40,22 @@ namespace ConsoleBankApp
                 {
                     System.Threading.Thread.Sleep(1000);
                     Console.Clear();
-                    string a, b, c;
+                    int a;
+                    string b, c, d;
                     Console.WriteLine(" ==================\n Create new account\n ==================\n");
                     Console.WriteLine(" Please enter your name:");
-                    a = Console.ReadLine();
-                    Console.WriteLine("\n Please enter your surname:");
                     b = Console.ReadLine();
-                    Console.WriteLine("\n Please set a password for your account:");
+                    Console.WriteLine("\n Please enter your surname:");
                     c = Console.ReadLine();
-                    //Hesap ekleme
-                    BankAccount account = new BankAccount(a, b, c);
-                    DatabaseOperations.SaveAccount(a, b, c);
-
-
-
-
-                    //Kayıt başarılı
-                    Console.ReadLine();
+                    Console.WriteLine("\n Please set a password for your account:");
+                    d = Console.ReadLine();
+                    //Creating new account and writing to txt file
+                    a = accountList.Count;
+                    BankAccount account = new BankAccount(a+1, b, c, d);
+                    accountList.Add(account);
+                    dbo.WriteToFile(accountList);
+                    Console.WriteLine(" New account created! Press any key to continue...");
+                    Console.ReadKey();
                 }
 
                 else if (selection == 3)
@@ -72,16 +67,22 @@ namespace ConsoleBankApp
 
                     if (enteredAdminPassword == adminPassword)
                     {
+                        Console.WriteLine("The admin password is correct...");
+                        System.Threading.Thread.Sleep(1500);
+                        Console.Clear();
                         Console.WriteLine(" ============\n Admin Hesabi\n ============\n");
                         Console.WriteLine(" 1.All accounts\n 2.Exit\n");
                         selection2 = Convert.ToByte(Console.ReadLine());
                         switch (selection2)
                         {
                             case 1:
-                                //dosyadan bilgileri yazdır
-                                //HesapGoster(hesap);
-
-
+                                Console.Clear();
+                                Console.WriteLine("\n AccountNo  Name            Surname         Password        Balance");
+                                Console.WriteLine(" ==================================================================");
+                                foreach (var item in accountList)
+                                {
+                                    Console.WriteLine(String.Format(" {0,-10} {1,-15} {2,-15} {3,-15} {4,-15}", item.accountNumber, item.name, item.surname, item.password, item.balance));
+                                }
                                 Console.WriteLine("\n Press any key to exit...");
                                 Console.ReadLine();
                                 Console.Clear();
@@ -89,15 +90,15 @@ namespace ConsoleBankApp
                             case 2:
                                 break;
                             default:
-                                Console.WriteLine("\nHatali giris yaptiniz. Ana menuye donmek icin herhangi bir tusa basiniz...");
-                                Console.ReadLine();
+                                Console.WriteLine("\n You have entered an incorrect value.Please try again...");
+                                Console.ReadKey();
                                 Console.Clear();
                                 break;
                         }
                     }
                     else
                     {
-                        Console.WriteLine("\nHatali giris yaptiniz. Ana menuye donmek icin herhangi bir tusa basiniz...");
+                        Console.WriteLine("\n You have entered an incorrect value.Please try again...");
                         Console.WriteLine();
                         Console.Clear();
                     }
@@ -111,7 +112,7 @@ namespace ConsoleBankApp
                 }
 
                 else
-                    Console.WriteLine("You have entered an incorrect value.Please try again...");
+                    Console.WriteLine(" You have entered an incorrect value.Please try again...");
 
             }
 
@@ -135,32 +136,26 @@ namespace ConsoleBankApp
 
                 if (verification == false)
                 {
-                    Console.WriteLine(" Yanlis Giris Yaptiniz.\n");
-                    Console.WriteLine(" Lutfen Tekrar Deneyiniz.\n");
-                    Console.WriteLine(" Lutfen Bekleyiniz...");
+                    Console.WriteLine("\n Checking username and password...");
+                    System.Threading.Thread.Sleep(1000);
+                    Console.WriteLine(" Wrong username or password!\n");
+                    Console.WriteLine(" Please try again...\n");
+                    System.Threading.Thread.Sleep(1000);
+                    Console.Clear();
                     Console.WriteLine(" \n");
                     continue; //Continue to username & password control loop
                 }
                 else
                 {
-                    Console.WriteLine("\n Kullanici adi ve sifreniz dogrulanmaktadir...");
+                    Console.WriteLine("\n Checking username and password...");
                     System.Threading.Thread.Sleep(1000);
                     Console.Clear();
-                    Console.WriteLine("\n Kullanici adi ve sifresi dogrulandi...\n");
+                    Console.WriteLine("\n Username and password verified!\n");
                     System.Threading.Thread.Sleep(1000);
                     Console.Clear();
-                    break; //for döngüsünden çıkış sağlanmaktadır.
+                    break; //exit from the login screen and continue with transaction menu
                 }
             }
-
-
-
-
-
-
-
-
-            char cevap2 = 'a';
 
             while (verification == true && selection3 != 1)
             {
@@ -171,13 +166,9 @@ namespace ConsoleBankApp
                 {
                     //Console.WriteLine("Sayin %s %s, Sezgin Bank\'a Hos Geldiniz...\n\n", ad, soyad);
                     //printf("\n%s %s %d", ad, soyad, bakiye);
-                    Console.WriteLine(" ISLEM MENUSU\n");
-                    Console.WriteLine(" ============\n\n");
-                    Console.WriteLine(" 1-Hesap Bakiyesi Goruntuleme\n");
-                    Console.WriteLine(" 2-Hesaba Para Yatirma\n");
-                    Console.WriteLine(" 3-Hesaptan Para Cekme\n");
-                    Console.WriteLine(" 4-Para Gonderme\n");
-                    Console.WriteLine(" 5-Cikis\n");
+                    Console.WriteLine(" Welcome, {0} {1}\n Account number:{2}", accountList[accountNumber].name, accountList[accountNumber].surname, accountList[accountNumber].accountNumber);
+                    Console.WriteLine(" ============\n TRANSACTION MENU\n ============\n\n");
+                    Console.WriteLine(" 1-Hesap Bakiyesi Goruntuleme\n 2-Hesaba Para Yatirma\n 3-Hesaptan Para Cekme\n 4-Para Gonderme\n 5-Cikis\n");
                     Console.WriteLine(" Luften Rakam Girerek Yapacaginiz Islemi Seciniz (1/2/3/4/5): ");
                     selection4 = Convert.ToByte(Console.ReadKey().Key);
                     Console.WriteLine("\n");
@@ -277,17 +268,17 @@ namespace ConsoleBankApp
                             break;
                     }
 
-                    if (selection4 == 5) //döngüden, yani banka otomasyonundan çıkmak için kurulmuştur.
+                    if (selection4 == 5) //Exit from the transaction menu loop
                         break;
 
 
                     Console.WriteLine(" Do you want to continue? ( (Y)es - (N)o )");
-                    cevap2 = Convert.ToChar(Console.ReadKey().KeyChar);
+                    answer = Convert.ToChar(Console.ReadKey().KeyChar);
                     Console.Clear();
 
-                } while (cevap2 == 'Y' || cevap2 == 'y'); // 'E' veya 'e' olması halinde menü ekrana gelecektir.
+                } while (answer == 'Y' || answer == 'y'); // 'E' veya 'e' olması halinde menü ekrana gelecektir.
 
-                if (cevap2 == 'N' || cevap2 == 'n') //'H' veya 'h' olması halinde döngüden çıkılacak ve çıkış işlemi gerçekleşecektir.
+                if (answer == 'N' || answer == 'n') //'H' veya 'h' olması halinde döngüden çıkılacak ve çıkış işlemi gerçekleşecektir.
                     break;
                 else
                 {
@@ -296,7 +287,12 @@ namespace ConsoleBankApp
                 }
 
             }
-
+            Console.Clear();
+            Console.WriteLine("\n Exit");
+            Console.WriteLine("\n =====");
+            Console.WriteLine("\n\n Exiting from the Bank Application...");
+            Console.WriteLine("\n Thank you for using Sezgin Bank! :)");
+            System.Threading.Thread.Sleep(3000);
         }
 
 
