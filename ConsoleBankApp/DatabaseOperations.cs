@@ -7,10 +7,16 @@ using System.IO;
 
 namespace ConsoleBankApp
 {
-    public class DatabaseOperations
+    public class DatabaseOperations:IDatabaseConnector
     {
+        public void AddAccount(BankAccount account)
+        {
+            StreamWriter sw = new StreamWriter("AccountDatabase.txt", true);
+            sw.WriteLine(String.Format("{0,-10} {1,-15} {2,-15} {3,-15} {4,-15}", account.accountNumber, account.name, account.surname, account.password, account.balance));
+            sw.Close();
+        }
 
-        public void Write(List<BankAccount> lst)
+        public void UpdateAccounts(List<BankAccount> lst) //Updates all accounts in the txt database, according to the List<BankAccount>
         {
             StreamWriter sw = new StreamWriter("AccountDatabase.txt");
             foreach (var item in lst)
@@ -20,7 +26,7 @@ namespace ConsoleBankApp
             sw.Close();
         }
 
-        public List<BankAccount> Read()
+        public List<BankAccount> ReadAccounts()
         {
             if (File.Exists("AccountDatabase.txt") == false)
             {              
@@ -41,7 +47,7 @@ namespace ConsoleBankApp
             return baList;
         }
 
-        public bool LoginCheck(string _name, string _surname, string _password, ref byte _accountNumber)
+        public bool LoginCheck(string _name, string _surname, string _password, ref int _accountNumber)
         {
             Console.WriteLine("\n Checking username and password...\n");
             System.Threading.Thread.Sleep(1000);
@@ -74,17 +80,6 @@ namespace ConsoleBankApp
                 System.Threading.Thread.Sleep(1000);
                 return false;
             }
-        }
-        public void ShowAllAccounts(List<BankAccount> accountList)
-        {
-            Console.WriteLine("\n AccountNo  Name            Surname         Password        Balance");
-            Console.WriteLine(" ==================================================================");
-            foreach (var item in accountList)
-            {
-                Console.WriteLine(String.Format(" {0,-10} {1,-15} {2,-15} {3,-15} {4,-15}", item.accountNumber, item.name, item.surname, item.password, item.balance));
-            }
-            Console.WriteLine("\n Press any key to exit...");
-            Console.ReadKey();
         }
 
     }
