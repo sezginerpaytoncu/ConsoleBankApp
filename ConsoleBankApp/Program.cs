@@ -12,21 +12,23 @@ namespace ConsoleBankApp
     {
         public void Run()
         {
-            byte accountNumber = 0, selection, selection2, selection3 = 0, selection4;
+            int accountNumber = 0, selection, selection2, selection3 = 0, selection4;
             int adminPassword = 123123, enteredAdminPassword;
             bool verification = false; //used for user login
             decimal depositAmount, withdrawalAmount;
             char answer = 'a'; //Declared for transaction menu, for Continue=(Y)ES or (N)O
 
-            DatabaseOperations dbo = new DatabaseOperations();
-            List<BankAccount> accountList = dbo.Read();
+            IDatabaseConnector dbo = new DatabaseOperations();
+            //dbo = new SqlDatabaseOperations();
+            List<BankAccount> accountList = dbo.ReadAccounts();
 
             while (true) //Main Menu
             {
+
                 Console.Clear();
                 Console.WriteLine(" ==============================================\n ================SEZGIN BANK===================\n =====Welcome to the Bank Account Program!=====\n ==============================================\n");
                 Console.WriteLine(" 1.Login\n 2.Create new account\n 3.Admin account login\n 4.Exit\n");
-                selection = Convert.ToByte(Console.ReadLine());
+                selection = Convert.ToInt32(Console.ReadLine());
 
                 if (selection == 1)
                     break;
@@ -44,11 +46,11 @@ namespace ConsoleBankApp
                     createSurname = Console.ReadLine();
                     Console.WriteLine("\n Please set a password for your account:");
                     createPassword = Console.ReadLine();
-                    //Creating a new account and writing it to txt file
+                    //Creating a new account and writing it to txt file OR sql database
                     accountNumberInDatabase = accountList.Count;
                     BankAccount account = new BankAccount(accountNumberInDatabase+1, createName, createSurname, createPassword);
                     accountList.Add(account);
-                    dbo.Write(accountList);
+                    dbo.AddAccount(account);
                     Console.WriteLine(" New account created! Press any key to continue...");
                     Console.ReadKey();
                 }
@@ -67,12 +69,19 @@ namespace ConsoleBankApp
                         Console.Clear();
                         Console.WriteLine(" =============\n Admin Account\n =============\n");
                         Console.WriteLine(" 1.All accounts\n 2.Exit\n");
-                        selection2 = Convert.ToByte(Console.ReadLine());
+                        selection2 = Convert.ToInt32(Console.ReadLine());
                         switch (selection2)
                         {
                             case 1:
                                 Console.Clear();
-                                dbo.ShowAllAccounts(accountList);
+                                Console.WriteLine("\n AccountNo  Name            Surname         Password        Balance");
+                                Console.WriteLine(" ==================================================================");
+                                foreach (var item in accountList)
+                                {
+                                    Console.WriteLine(String.Format(" {0,-10} {1,-15} {2,-15} {3,-15} {4,-15}", item.accountNumber, item.name, item.surname, item.password, item.balance));
+                                }
+                                Console.WriteLine("\n Press any key to exit...");
+                                Console.ReadKey();
                                 break;
                             case 2:
                                 break;
@@ -116,11 +125,13 @@ namespace ConsoleBankApp
                 enteredPassword = Console.ReadLine();
 
                 verification = dbo.LoginCheck(enteredName, enteredSurname, enteredPassword, ref accountNumber);
+
                 if (verification == true)
                     break;
             }
 
-            while (verification == true && selection3 != 1) //Transaction Menu
+            //Transaction Menu
+            while (verification == true && selection3 != 1)
             {             
                 BankAccount currentAccount = accountList[accountNumber];
 
@@ -131,7 +142,7 @@ namespace ConsoleBankApp
                     Console.WriteLine(" ============\n TRANSACTION MENU\n ============\n\n");
                     Console.WriteLine(" 1-View account balance\n 2-Deposit\n 3-Withdrawal\n 4-Remittance/Transfer\n 5-Exit\n");
                     Console.WriteLine(" Please select transaction by entering number (1/2/3/4/5): ");
-                    selection4 = Convert.ToByte(Console.ReadLine());
+                    selection4 = Convert.ToInt32(Console.ReadLine());
                     switch (selection4)
                     {
                         case 1: //Displaying account's balance
@@ -146,7 +157,7 @@ namespace ConsoleBankApp
                             Console.WriteLine("\n Please enter the amount you want to deposit into your account:");
                             depositAmount = Convert.ToDecimal(Console.ReadLine());
                             currentAccount = currentAccount.MakeDeposit(currentAccount, depositAmount);
-                            dbo.Write(accountList);
+                            dbo.UpdateAccounts(accountList);
                             break;
 
                         case 3: //Withdrawal
@@ -155,7 +166,7 @@ namespace ConsoleBankApp
                             Console.WriteLine("\n Please enter the amount you want to withdraw from your account:");
                             withdrawalAmount = Convert.ToDecimal(Console.ReadLine());
                             currentAccount = currentAccount.MakeWithdrawal(currentAccount, withdrawalAmount);
-                            dbo.Write(accountList);
+                            dbo.UpdateAccounts(accountList);
                             break;
 
                         case 4: //Money Transfer-Remittance
@@ -182,9 +193,9 @@ namespace ConsoleBankApp
                                 else if (currentAccount.balance >= remittanceAmount)
 								{
                                     currentAccount.balance -= remittanceAmount;
-                                    accountList[receiverAccountNumber].balance += remittanceAmount;
-                                    dbo.Write(accountList);
-									Console.WriteLine(" You have transferred {0}$ to {1} {2}'s account.\n\n", remittanceAmount, currentAccount.name, accountList[receiverAccountNumber].surname);
+                                    accountList[receiverAccountNumber].balance += remittanceAmount; //Transfer
+                                    dbo.UpdateAccounts(accountList);
+									Console.WriteLine(" You have transferred {0}$ to {1} {2}'s account.\n\n", remittanceAmount, accountList[receiverAccountNumber].name, accountList[receiverAccountNumber].surname);
 									Console.WriteLine(" Your current balance: {0}$ \n", currentAccount.balance);
 									break;
 								}
@@ -239,9 +250,6 @@ namespace ConsoleBankApp
         static void Main(string[] args)
         {
             (new Program()).Run();
-
-
-
 
         }
     }
